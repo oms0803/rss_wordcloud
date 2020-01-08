@@ -4,7 +4,8 @@ import pandas as pd
 
 import feedparser
 import newspaper
-from konlpy.tag import Kkma
+# from konlpy.tag import Kkma
+from konlpy.tag import Mecab
 from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
@@ -15,6 +16,8 @@ def draw_wordcloud_from_rss(rss_link):
     feeds = feedparser.parse(rss_link)
     links = [entry['link'] for entry in feeds['entries']]
 
+    print ("Parsing main paragraphs complete")
+
     news_text = ''
     for link in links:
         article = newspaper.Article(link, language='ko')
@@ -22,14 +25,19 @@ def draw_wordcloud_from_rss(rss_link):
         article.parse()
         news_text += article.text
 
-    # konlpy, Mecab: 형태소 분석을 통해 본문에서 명사추출, 1글자는 단어는 삭제
-    engine = Kkma()
+    print ("Article downloads complete")
+
+    # konlpy, Mecab: 형태소 분석을 통해 본문에서 명사추출, 1글자는 단어는 삭제;
+    # Mecab engine으로 바뀜.
+    engine = Mecab()
     nouns = engine.nouns(news_text)
     nouns = [n for n in nouns if len(n) > 1]
 
     # Counter: 단어수 세기, 가장 많이 등장한 단어(명사) 40개
     count = Counter(nouns)
     tags = count.most_common(40)
+
+    print ("Count complete")
 
     # WordCloud, matplotlib: 단어 구름 그리기
     font_path = '/Users/minseok/Downloads/Nanum_Myeongjo/NanumMyeongjo-Bold.ttf'
@@ -39,6 +47,8 @@ def draw_wordcloud_from_rss(rss_link):
     plt.axis('off')
     plt.imshow(cloud)
     plt.show()
+
+    print ("Plot successful")
 
 
 # 경향신문 경제뉴스 RSS
